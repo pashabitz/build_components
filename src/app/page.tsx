@@ -7,6 +7,11 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+async function getBody(pageId: string) {
+  const url = new URL(`${process.env.NEXT_PUBLIC_CONVEX_SITE_URL}/crawler/page/${pageId}`);
+  const response = fetch(url.toString());
+  return (await response).text();
+}
 
 export default function Home() {
   const tasks = useQuery(api.webCrawler.tasks.getRoot);
@@ -14,6 +19,7 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [domainFilter, setDomainFilter] = useState("");
   const pages = useQuery(api.webCrawler.pages.getByDomain, { domain: domainFilter });
+  const [body, setBody] = useState("");
   return (
     <main className="flex flex-col space-y-4 p-24">
       <Card>
@@ -59,11 +65,30 @@ export default function Home() {
             <TableBody>
             {pages && pages.map((page: { url: string, _id: string }) => 
               <TableRow key={page._id}>
-                <TableCell>{page.url}</TableCell>
+                <TableCell
+                className="cursor-pointer"
+                onClick={async () => {
+                  const body = await getBody(page._id);
+                  setBody(body);
+                }}
+                >
+                  {page.url}
+                </TableCell>
               </TableRow>
             )}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Page Body</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <pre className="text-wrap">
+            {body}
+          </pre>
         </CardContent>
       </Card>
     </main>

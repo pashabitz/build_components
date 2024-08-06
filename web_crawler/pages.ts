@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { httpAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { functions } from "./_generated/api";
 
 export const insert = internalMutation({
     args: { url: v.string(), bodyStorage: v.id("_storage") },
@@ -10,7 +11,7 @@ export const insert = internalMutation({
 });
 
 export const get = internalQuery({
-    args: { id: v.id("pages") },
+    args: { id: v.union(v.id("pages"), v.string()) },
     handler: async (ctx, args) => {
         return await ctx.db.query("pages")
         .filter(q => q.eq(q.field("_id"), args.id))
@@ -32,11 +33,27 @@ export const getByDomain = query({
     }
 })
 
-export const postMessage = httpAction(async (ctx, request) => {
-    const requestQueryString = new URL(request.url).searchParams;
-    console.log(requestQueryString);    
+export const getBody = httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const lastSlash = url.pathname.lastIndexOf("/");
+    const notFound = new Response(null, {
+        status: 404,
+    });
+    if (lastSlash === -1) {
+        return notFound;      
+    }
+    const pageId = url.pathname.substring(lastSlash + 1);
+    console.log(pageId);
 
-  return new Response(null, {
-    status: 200,
-  });
+    const page = await ctx.runQuery(functions.pages.get, { id: pageId });
+    if (!page || !page.bodyStorage) {
+        return notFound;
+    }
+    const blob = await ctx.storage.get(page.bodyStorage);
+    if (!blob) {
+        return notFound;
+    }
+
+
+  return new Response(blob, { status: 200, headers: { "Access-Control-Allow-Origin": "*" } });
 });

@@ -11,6 +11,7 @@
 
 import type * as crons from "../crons.js";
 import type * as fetching from "../fetching.js";
+import type * as http from "../http.js";
 import type * as pages from "../pages.js";
 import type * as tasks from "../tasks.js";
 
@@ -26,6 +27,7 @@ import type { ApiFromModules, FunctionReference } from "convex/server";
 declare const functions: ApiFromModules<{
   crons: typeof crons;
   fetching: typeof fetching;
+  http: typeof http;
   pages: typeof pages;
   tasks: typeof tasks;
 }>;
