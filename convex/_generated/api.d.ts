@@ -31,7 +31,6 @@ declare const fullApiWithMounts: typeof fullApi & {
   webCrawler: {
     fetching: {
       bar: FunctionReference<"action", "public", {}, any>;
-      periodicFetch: FunctionReference<"action", "public", {}, any>;
     };
     pages: {
       getByDomain: FunctionReference<
@@ -44,7 +43,6 @@ declare const fullApiWithMounts: typeof fullApi & {
     tasks: {
       get: FunctionReference<"query", "public", {}, any>;
       getRoot: FunctionReference<"query", "public", {}, any>;
-      getUnprocessed: FunctionReference<"query", "public", {}, any>;
       registerTask: FunctionReference<
         "mutation",
         "public",

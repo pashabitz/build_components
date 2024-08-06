@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { functions } from "./_generated/api";
 import {action, internalAction, internalMutation} from "./_generated/server";
 
-export const periodicFetch = action({
+export const periodicFetch = internalAction({
     args: {},
     handler: async (ctx) => {
         const tasks = await ctx.runQuery(functions.tasks.getUnprocessed, {});
@@ -56,7 +56,12 @@ export const createTasksFromLinks = internalAction({
             const taskUrl = getLinkUrl(links[i], page.url);
             if (!taskUrl) continue;
             console.log(`Registering link task ${taskUrl}`);
-            await ctx.runMutation(functions.tasks.registerLinkTask, { url: taskUrl });
+            try {
+                await ctx.runMutation(functions.tasks.registerLinkTask, { url: taskUrl });
+            }
+            catch (e) {
+                console.error(`Error registering link task ${taskUrl}: ${e}`);
+            }
         }
         console.log(links);
     },

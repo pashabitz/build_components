@@ -152,7 +152,6 @@ export declare const app: {
   webCrawler: {
     fetching: {
       bar: FunctionReference<"action", "internal", {}, any>;
-      periodicFetch: FunctionReference<"action", "internal", {}, any>;
     };
     pages: {
       getByDomain: FunctionReference<
@@ -165,7 +164,6 @@ export declare const app: {
     tasks: {
       get: FunctionReference<"query", "internal", {}, any>;
       getRoot: FunctionReference<"query", "internal", {}, any>;
-      getUnprocessed: FunctionReference<"query", "internal", {}, any>;
       registerTask: FunctionReference<
         "mutation",
         "internal",

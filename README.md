@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Crawler Component
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Install
+```
+// in convex/app.config.ts
+const crawlerComponent = app.install(webCrawler, { name: "webCrawler", args: {} });
+app.mount({ webCrawler: crawlerComponent.exports as any });
+app.mountHttp("/crawler/", crawlerComponent);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Use
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Register a crawler task
+Use the mutation `tasks.registerTasks` from your own convex function:
+```
+ctx.runMutation(api.webCrawler.tasks.registerTask, { url: "https://example.com" });
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Or form your client:
+```
+const registerTask = useMutation(api.webCrawler.tasks.registerTask);
+registerTask({ url: "https://example.com" });
+```
 
-## Learn More
+### Get all fetched pages by domain
+```
+ctx.runQuery(api.webCrawler.pages.getByDomain, { domain: "example.com" });
+```
 
-To learn more about Next.js, take a look at the following resources:
+Returns
+```
+Array<{
+    _id: Id<"pages">;
+    _creationTime: number;
+    bodyStorage?: Id<"_storage"> | undefined;
+    url: string;
+    domain: string;
+}>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Get body of page
+Using the id obtained from `getByDomains` above make a request to
+```
+YOUR_CONVEX_SITE_URL/crawler/page/ID
+```

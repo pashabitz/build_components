@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 
 function isUrlValid(str: string) {
     const pattern = new RegExp(
@@ -63,7 +63,7 @@ export const getRoot = query({
     }
 });
 
-export const getUnprocessed = query({
+export const getUnprocessed = internalQuery({
     args: {},
     handler: async (ctx) => {
         return await ctx.db
