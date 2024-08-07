@@ -14,4 +14,8 @@ export default defineSchema({
     })
     .index("by_domain", ["domain"])
     .index("by_url", ["url"]),
+    domains: defineTable({
+        domain: v.string(),
+        lastFetched: v.number(),
+    }).index("by_domain", ["domain"]),
 });

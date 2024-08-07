@@ -43,6 +43,21 @@ export const getByUrl = query({
     }
 })
 
+export const setDomainLastFetched = internalMutation({
+    args: { domain: v.string() },
+    handler: async (ctx, args) => {
+        const existingDomain = await ctx.db
+        .query("domains")
+        .filter(q => q.eq(q.field("domain"), args.domain))
+        .unique();
+        if (existingDomain) {
+            await ctx.db.patch(existingDomain._id, { lastFetched: Date.now() });
+        } else {
+            await ctx.db.insert("domains", { domain: args.domain, lastFetched: Date.now() });
+        }
+    },
+})
+
 export const getBody = httpAction(async (ctx, request) => {
     const url = new URL(request.url);
     const lastSlash = url.pathname.lastIndexOf("/");

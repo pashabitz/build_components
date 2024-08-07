@@ -33,6 +33,7 @@ export const periodicFetch = internalAction({
             console.log(`Skipping ${url}`);
         }
         await ctx.scheduler.runAfter(1000, functions.tasks.setProcessedByUrl, { url });
+        await ctx.scheduler.runAfter(2000, functions.pages.setDomainLastFetched, { domain: new URL(url).hostname });
     }
 })
 
