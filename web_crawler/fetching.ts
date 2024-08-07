@@ -4,7 +4,12 @@ import {action, internalAction, internalMutation} from "./_generated/server";
 
 const shouldSkipUrl = (url: string) => {
     const lowercaseUrl = url.toLowerCase();
-    if (lowercaseUrl.endsWith(".css") || lowercaseUrl.endsWith(".svg") || lowercaseUrl.endsWith(".png")) return true;
+    const blacklistExtensions = ["css", "svg", "png", "ico"];
+    const lastDot = lowercaseUrl.lastIndexOf(".");
+    if (lastDot > -1) {
+        const extension = lowercaseUrl.substring(lastDot + 1);
+        if (blacklistExtensions.includes(extension)) return true;
+    }
     return false;
 }
 
