@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { functions } from "./_generated/api";
 import {action, internalAction, internalMutation} from "./_generated/server";
+import { getDomain } from "./pages";
 
 const shouldSkipUrl = (url: string) => {
     const lowercaseUrl = url.toLowerCase();
@@ -16,7 +17,9 @@ const shouldSkipUrl = (url: string) => {
 export const periodicFetch = internalAction({
     args: {},
     handler: async (ctx) => {
-        const task = await ctx.runQuery(functions.tasks.getUnprocessed, {});
+        const recentlyFetchedDomains = (await ctx.runQuery(functions.pages.getRecentlyFetchedDomains, {})).map(d => d.domain);
+        console.log(`Excluding recently fetched domains ${recentlyFetchedDomains.join(', ')}`);
+        const task = await ctx.runQuery(functions.tasks.getUnprocessed, { domainsToSkip: recentlyFetchedDomains });
         if (!task) return;
         const url = task.url;
         // fetch from url
@@ -33,17 +36,10 @@ export const periodicFetch = internalAction({
             console.log(`Skipping ${url}`);
         }
         await ctx.scheduler.runAfter(1000, functions.tasks.setProcessedByUrl, { url });
-        await ctx.scheduler.runAfter(2000, functions.pages.setDomainLastFetched, { domain: new URL(url).hostname });
+        await ctx.scheduler.runAfter(2000, functions.pages.setDomainLastFetched, { domain: getDomain(url) });
     }
 })
 
-export const bar = action({
-    args: {},
-    handler: async () => {
-        console.log("bar");
-        return "bar";
-    }
-})
 
 function getLinkUrl(url: string, root: string) {
     if (shouldSkipUrl(url)) return null;

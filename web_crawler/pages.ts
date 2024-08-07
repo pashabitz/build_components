@@ -1,11 +1,15 @@
 import { v } from "convex/values";
 import { httpAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { functions } from "./_generated/api";
+import { url } from "inspector";
 
+export const getDomain = (url: string) => {
+    return new URL(url).hostname;
+}
 export const insert = internalMutation({
     args: { url: v.string(), bodyStorage: v.id("_storage") },
     handler: async (ctx, args) => {
-        const domain = new URL(args.url).hostname;
+        const domain = getDomain(args.url);
         return await ctx.db.insert("pages", { url: args.url, bodyStorage: args.bodyStorage, domain });
     }
 });
@@ -56,6 +60,18 @@ export const setDomainLastFetched = internalMutation({
             await ctx.db.insert("domains", { domain: args.domain, lastFetched: Date.now() });
         }
     },
+})
+
+export const getRecentlyFetchedDomains = internalQuery({
+    args: {},
+    handler: async (ctx) => {
+        const domains = await ctx.db
+            .query("domains")
+            .withIndex("by_lastFetched")
+            .order("desc")
+            .take(10);
+        return domains.filter(d => d.lastFetched > Date.now() - 1000 * 60);
+    }
 })
 
 export const getBody = httpAction(async (ctx, request) => {

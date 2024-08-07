@@ -6,7 +6,10 @@ export default defineSchema({
         url: v.string(),
         isRoot: v.boolean(),
         lastProcessed: v.optional(v.number()),
-    }).index("by_isRoot", ["isRoot"]),
+        domain: v.optional(v.string()),
+    })
+    .index("by_isRoot", ["isRoot"])
+    .index("by_domain", ["domain"]),
     pages: defineTable({
         url: v.string(),
         bodyStorage: v.optional(v.id("_storage")),
@@ -17,5 +20,7 @@ export default defineSchema({
     domains: defineTable({
         domain: v.string(),
         lastFetched: v.number(),
-    }).index("by_domain", ["domain"]),
+    })
+    .index("by_domain", ["domain"])
+    .index("by_lastFetched", ["lastFetched"]),
 });

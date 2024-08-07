@@ -150,9 +150,6 @@ export type DatabaseWriter = GenericDatabaseWriter<DataModel>;
 
 export declare const app: {
   webCrawler: {
-    fetching: {
-      bar: FunctionReference<"action", "internal", {}, any>;
-    };
     pages: {
       getByDomain: FunctionReference<
         "query",

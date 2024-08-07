@@ -25,9 +25,6 @@ import type {
 declare const fullApi: ApiFromModules<{}>;
 declare const fullApiWithMounts: typeof fullApi & {
   webCrawler: {
-    fetching: {
-      bar: FunctionReference<"action", "public", {}, any>;
-    };
     pages: {
       getByDomain: FunctionReference<
         "query",

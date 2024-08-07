@@ -1,5 +1,8 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { getDomain } from "./pages";
+import { PaginationOptions, paginationOptsValidator } from "convex/server";
+import { functions } from "./_generated/api";
 
 function isUrlValid(str: string) {
     const pattern = new RegExp(
@@ -22,7 +25,7 @@ export const registerTask = mutation({
         if (!isUrlValid(args.url)) {
             throw new Error("Invalid URL");
         }
-        return await ctx.db.insert("tasks", { url: args.url, isRoot: true });
+        return await ctx.db.insert("tasks", { url: args.url, isRoot: true, domain: getDomain(args.url) });
     }
 });
 export const registerLinkTask = internalMutation({
@@ -42,7 +45,7 @@ export const registerLinkTask = internalMutation({
             console.log(`Skipping task registration for ${args.url} - fetched last at ${date}}`);
             return;
         }
-        return await ctx.db.insert("tasks", { url: args.url, isRoot: false });
+        return await ctx.db.insert("tasks", { url: args.url, isRoot: false, domain: getDomain(args.url) });
     }
 });
 
@@ -64,12 +67,17 @@ export const getRoot = query({
 });
 
 export const getUnprocessed = internalQuery({
-    args: {},
-    handler: async (ctx) => {
-        return await ctx.db
-            .query("tasks")
-            .filter(q => q.eq(q.field("lastProcessed"), undefined))
-            .first();
+    args: { domainsToSkip: v.union(v.array(v.string()), v.null()) },
+    handler: async (ctx, args) => {
+        let query = ctx.db
+        .query("tasks")
+        .filter(q => q.eq(q.field("lastProcessed"), undefined));
+        // if (args.domainsToSkip) {
+        //     args.domainsToSkip.forEach(domain => {
+        //         query = query.filter(q => q.neq(q.field("domain"), domain));
+        //     });
+        // }
+        return await query.first();
     }
 });
 
@@ -96,3 +104,42 @@ export const setProcessedByUrl = internalMutation({
         }
     }
 });
+
+export const getPageOfTasks = internalQuery({
+    args: { laterThan: v.number() },
+    handler: async (ctx, args) => {
+        let laterThan = args.laterThan;
+            console.log(`Fetching tasks created after ${new Date(laterThan)}`);
+        return await ctx.db
+            .query("tasks")
+            .filter(q => q.gt(q.field("_creationTime"), laterThan))
+            .order("asc")
+            .take(1000);
+    }
+})
+
+export const setTaskDomain = internalMutation({
+    args: { task: v.object({ _id: v.id("tasks"), url: v.string() }) },
+    handler: async (ctx, args) => {
+        await ctx.db.patch(args.task._id, { domain: getDomain(args.task.url) });
+    }
+})
+
+export const addDomainToTasks = internalAction({
+    args: {},
+    handler: async (ctx) => {
+        let laterThan = Date.now() - 1000 * 60 * 60 * 48;
+        while (true) {
+            const tasks = await ctx.runQuery(functions.tasks.getPageOfTasks, { laterThan });
+            if (!tasks || tasks.length === 0) {
+                break;
+            }
+            console.log(`Processing ${tasks.length} tasks`);
+            for (const t of tasks) {
+                await ctx.runMutation(functions.tasks.setTaskDomain, { task: { _id: t._id, url: t.url} });
+                // console.log(`Processing task ${task._id}`);
+            }
+            laterThan = tasks[tasks.length - 1]._creationTime;
+        }
+    }
+})
