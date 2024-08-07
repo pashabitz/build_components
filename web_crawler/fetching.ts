@@ -34,7 +34,7 @@ export const periodicFetch = internalAction({
         } else {
             console.log(`Skipping ${url}`);
         }
-        await ctx.runMutation(functions.tasks.setProcessedByUrl, { url });
+        await ctx.scheduler.runAfter(1000, functions.tasks.setProcessedByUrl, { url });
     }
 })
 
