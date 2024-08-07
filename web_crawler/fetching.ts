@@ -2,6 +2,11 @@ import { v } from "convex/values";
 import { functions } from "./_generated/api";
 import {action, internalAction, internalMutation} from "./_generated/server";
 
+const shouldSkipUrl = (url: string) => {
+    if (url.toLowerCase().endsWith(".css")) return true;
+    return false;
+}
+
 export const periodicFetch = internalAction({
     args: {},
     handler: async (ctx) => {
@@ -11,16 +16,19 @@ export const periodicFetch = internalAction({
         const task = tasks[0];
         const url = task.url;
         // fetch from url
-        console.log(`Fetching ${url}`);
-        const response = await fetch(url);
-        console.log(`Response status ${response.status}`);
-        const blob = await response.blob();
-        // save to pages
-        const storageId = await ctx.storage.store(blob)
-        const pageId = await ctx.runMutation(functions.pages.insert, { url, bodyStorage: storageId });
-        // await ctx.runMutation(functions.tasks.setProcessed, { id: task._id });
+        if (!shouldSkipUrl(url)) {
+            console.log(`Fetching ${url}`);
+            const response = await fetch(url);
+            console.log(`Response status ${response.status}`);
+            const blob = await response.blob();
+            // save to pages
+            const storageId = await ctx.storage.store(blob)
+            const pageId = await ctx.runMutation(functions.pages.insert, { url, bodyStorage: storageId });
+            await ctx.scheduler.runAfter(0, functions.fetching.createTasksFromLinks, { pageId });
+        } else {
+            console.log(`Skipping ${url}`);
+        }
         await ctx.runMutation(functions.tasks.setProcessedByUrl, { url });
-        await ctx.scheduler.runAfter(0, functions.fetching.createTasksFromLinks, { pageId });
     }
 })
 
@@ -33,6 +41,7 @@ export const bar = action({
 })
 
 function getLinkUrl(url: string, root: string) {
+    if (shouldSkipUrl(url)) return null;
     if (url.startsWith("http://") || url.startsWith("https://")) {
         return url;
     }
