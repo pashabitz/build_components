@@ -9,8 +9,6 @@
  * @module
  */
 
-import type * as parent from "../parent.js";
-
 import type {
   ApiFromModules,
   FilterApi,
@@ -24,9 +22,7 @@ import type {
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const fullApi: ApiFromModules<{
-  parent: typeof parent;
-}>;
+declare const fullApi: ApiFromModules<{}>;
 declare const fullApiWithMounts: typeof fullApi & {
   webCrawler: {
     fetching: {
