@@ -21,7 +21,8 @@ export default function Home() {
   const pages = useQuery(api.webCrawler.pages.getByDomain, { domain: domainFilter });
   const [body, setBody] = useState("");
   return (
-    <main className="flex flex-col space-y-4 p-24">
+    <main className="flex flex-col space-y-4 p-12">
+      <h1 className="text-2xl font-bold">Crawlvex</h1>
       <Card>
         <CardHeader>
           <CardTitle>Tasks</CardTitle>

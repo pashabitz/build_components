@@ -11,7 +11,7 @@ app.mountHttp("/crawler/", crawlerComponent);
 ## Use
 
 ### Register a crawler task
-Use the mutation `tasks.registerTasks` from your own convex function:
+Use the mutation `tasks.registerTask` from your own convex function:
 ```
 ctx.runMutation(api.webCrawler.tasks.registerTask, { url: "https://example.com" });
 ```
