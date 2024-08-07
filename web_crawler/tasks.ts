@@ -69,7 +69,7 @@ export const getUnprocessed = internalQuery({
         return await ctx.db
             .query("tasks")
             .filter(q => q.eq(q.field("lastProcessed"), undefined))
-            .collect();
+            .first();
     }
 });
 

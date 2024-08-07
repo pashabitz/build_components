@@ -16,10 +16,8 @@ const shouldSkipUrl = (url: string) => {
 export const periodicFetch = internalAction({
     args: {},
     handler: async (ctx) => {
-        const tasks = await ctx.runQuery(functions.tasks.getUnprocessed, {});
-        console.log(`Found ${tasks.length} tasks`);
-        if (!tasks || tasks.length === 0) return;
-        const task = tasks[0];
+        const task = await ctx.runQuery(functions.tasks.getUnprocessed, {});
+        if (!task) return;
         const url = task.url;
         // fetch from url
         if (!shouldSkipUrl(url)) {
