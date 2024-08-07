@@ -63,7 +63,8 @@ export const getRoot = query({
         return await ctx.db
             .query("tasks")
             .filter(q => q.eq(q.field("isRoot"), true))
-            .collect();
+            .order("desc")
+            .take(10);
     }
 });
 
