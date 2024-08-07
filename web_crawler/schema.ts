@@ -6,7 +6,7 @@ export default defineSchema({
         url: v.string(),
         isRoot: v.boolean(),
         lastProcessed: v.optional(v.number()),
-    }),
+    }).index("by_isRoot", ["isRoot"]),
     pages: defineTable({
         url: v.string(),
         bodyStorage: v.optional(v.id("_storage")),
