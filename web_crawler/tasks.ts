@@ -32,7 +32,8 @@ export const registerLinkTask = internalMutation({
     args: { url: v.string() },
     handler: async (ctx, args) => {
         if (!isUrlValid(args.url)) {
-            throw new Error("Invalid URL");
+            console.log(`Skipping registering task for invalid url ${args.url}`);
+            return;
         }
         const lastExistingPage = await ctx.db
             .query("pages")
@@ -72,11 +73,11 @@ export const getUnprocessed = internalQuery({
         let query = ctx.db
         .query("tasks")
         .filter(q => q.eq(q.field("lastProcessed"), undefined));
-        // if (args.domainsToSkip) {
-        //     args.domainsToSkip.forEach(domain => {
-        //         query = query.filter(q => q.neq(q.field("domain"), domain));
-        //     });
-        // }
+        if (args.domainsToSkip) {
+            args.domainsToSkip.forEach(domain => {
+                query = query.filter(q => q.neq(q.field("domain"), domain));
+            });
+        }
         return await query.first();
     }
 });
@@ -115,31 +116,5 @@ export const getPageOfTasks = internalQuery({
             .filter(q => q.gt(q.field("_creationTime"), laterThan))
             .order("asc")
             .take(1000);
-    }
-})
-
-export const setTaskDomain = internalMutation({
-    args: { task: v.object({ _id: v.id("tasks"), url: v.string() }) },
-    handler: async (ctx, args) => {
-        await ctx.db.patch(args.task._id, { domain: getDomain(args.task.url) });
-    }
-})
-
-export const addDomainToTasks = internalAction({
-    args: {},
-    handler: async (ctx) => {
-        let laterThan = Date.now() - 1000 * 60 * 60 * 48;
-        while (true) {
-            const tasks = await ctx.runQuery(functions.tasks.getPageOfTasks, { laterThan });
-            if (!tasks || tasks.length === 0) {
-                break;
-            }
-            console.log(`Processing ${tasks.length} tasks`);
-            for (const t of tasks) {
-                await ctx.runMutation(functions.tasks.setTaskDomain, { task: { _id: t._id, url: t.url} });
-                // console.log(`Processing task ${task._id}`);
-            }
-            laterThan = tasks[tasks.length - 1]._creationTime;
-        }
     }
 })

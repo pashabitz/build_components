@@ -70,7 +70,7 @@ export const getRecentlyFetchedDomains = internalQuery({
             .withIndex("by_lastFetched")
             .order("desc")
             .take(10);
-        return domains.filter(d => d.lastFetched > Date.now() - 1000 * 60);
+        return domains.filter(d => d.lastFetched > Date.now() - 1000 * 60 * 2);
     }
 })
 
