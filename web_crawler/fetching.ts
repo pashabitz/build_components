@@ -3,7 +3,8 @@ import { functions } from "./_generated/api";
 import {action, internalAction, internalMutation} from "./_generated/server";
 
 const shouldSkipUrl = (url: string) => {
-    if (url.toLowerCase().endsWith(".css")) return true;
+    const lowercaseUrl = url.toLowerCase();
+    if (lowercaseUrl.endsWith(".css") || lowercaseUrl.endsWith(".svg") || lowercaseUrl.endsWith(".png")) return true;
     return false;
 }
 
