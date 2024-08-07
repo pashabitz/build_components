@@ -12,5 +12,6 @@ export default defineSchema({
         bodyStorage: v.optional(v.id("_storage")),
         domain: v.string(),
     })
-    .index("by_domain", ["domain"]),
+    .index("by_domain", ["domain"])
+    .index("by_url", ["url"]),
 });

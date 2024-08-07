@@ -33,6 +33,16 @@ export const getByDomain = query({
     }
 })
 
+export const getByUrl = query({
+    args: { url: v.string() },
+    handler: async (ctx, args) => {
+        return await ctx.db.query("pages")
+            .filter(q => q.eq(q.field("url"), args.url))
+            .order("desc")
+            .first();
+    }
+})
+
 export const getBody = httpAction(async (ctx, request) => {
     const url = new URL(request.url);
     const lastSlash = url.pathname.lastIndexOf("/");

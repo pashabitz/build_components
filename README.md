@@ -16,10 +16,25 @@ Use the mutation `tasks.registerTask` from your own convex function:
 ctx.runMutation(api.webCrawler.tasks.registerTask, { url: "https://example.com" });
 ```
 
-Or form your client:
+Or from your client:
 ```
 const registerTask = useMutation(api.webCrawler.tasks.registerTask);
 registerTask({ url: "https://example.com" });
+```
+
+### Get fetched page by URL
+```
+ctx.runQuery(api.webCrawler.pages.getByUrl, { url: "https://docs.convex.dev/home" });
+```
+Returns
+```
+{
+    _id: Id<"pages">;
+    _creationTime: number;
+    bodyStorage?: Id<"_storage"> | undefined;
+    url: string;
+    domain: string;
+} | null
 ```
 
 ### Get all fetched pages by domain

@@ -35,6 +35,7 @@ declare const fullApiWithMounts: typeof fullApi & {
         { domain: string },
         any
       >;
+      getByUrl: FunctionReference<"query", "public", { url: string }, any>;
     };
     tasks: {
       get: FunctionReference<"query", "public", {}, any>;

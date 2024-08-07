@@ -160,6 +160,7 @@ export declare const app: {
         { domain: string },
         any
       >;
+      getByUrl: FunctionReference<"query", "internal", { url: string }, any>;
     };
     tasks: {
       get: FunctionReference<"query", "internal", {}, any>;
