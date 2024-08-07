@@ -68,7 +68,6 @@ export const createTasksFromLinks = internalAction({
         for (let i = 0; i < links.length; i++) {
             const taskUrl = getLinkUrl(links[i], page.url);
             if (!taskUrl) continue;
-            console.log(`Registering link task ${taskUrl}`);
             try {
                 await ctx.runMutation(functions.tasks.registerLinkTask, { url: taskUrl });
             }
