@@ -124,9 +124,9 @@ export const setTaskDomain = internalMutation({
 })
 
 export const addDomainToTasks = internalAction({
-    args: {},
-    handler: async (ctx) => {
-        let laterThan = Date.now() - 1000 * 60 * 60 * 48;
+    args: { from: v.number(), to: v.number() },
+    handler: async (ctx, args) => {
+        let laterThan = args.from;
         while (true) {
             const tasks = await ctx.runQuery(functions.tasks.getPageOfTasks, { laterThan });
             if (!tasks || tasks.length === 0) {
@@ -134,6 +134,9 @@ export const addDomainToTasks = internalAction({
             }
             console.log(`Processing ${tasks.length} tasks`);
             for (const t of tasks) {
+                if (t._creationTime > args.to) {
+                    return;
+                }
                 await ctx.runMutation(functions.tasks.setTaskDomain, { task: { _id: t._id, url: t.url} });
             }
             laterThan = tasks[tasks.length - 1]._creationTime;
