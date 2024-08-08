@@ -9,7 +9,9 @@ export default defineSchema({
         domain: v.optional(v.string()),
     })
     .index("by_isRoot", ["isRoot"])
-    .index("by_domain", ["domain"]),
+    .index("by_domain", ["domain"])
+    .index("by_url", ["url"])
+    .index("by_lastProcessed", ["lastProcessed"]),
     pages: defineTable({
         url: v.string(),
         bodyStorage: v.optional(v.id("_storage")),

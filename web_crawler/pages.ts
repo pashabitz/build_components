@@ -31,7 +31,7 @@ export const getByDomain = query({
             ctx.db.query("pages")
         :
             ctx.db.query("pages")
-            .filter(q => q.eq(q.field("domain"), args.domain))
+            .withIndex("by_domain", q => q.eq("domain", args.domain))
         ;
         return await query.order("desc").take(10);
     }
@@ -41,7 +41,7 @@ export const getByUrl = query({
     args: { url: v.string() },
     handler: async (ctx, args) => {
         return await ctx.db.query("pages")
-            .filter(q => q.eq(q.field("url"), args.url))
+            .withIndex("by_url", q => q.eq("url", args.url))
             .order("desc")
             .first();
     }
@@ -52,7 +52,7 @@ export const setDomainLastFetched = internalMutation({
     handler: async (ctx, args) => {
         const existingDomain = await ctx.db
         .query("domains")
-        .filter(q => q.eq(q.field("domain"), args.domain))
+        .withIndex("by_domain", q => q.eq("domain", args.domain))
         .unique();
         if (existingDomain) {
             await ctx.db.patch(existingDomain._id, { lastFetched: Date.now() });
